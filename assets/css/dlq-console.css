@@ -1,0 +1,20 @@
+/**
+ * WooCommerce Webhook Dead-Letter Dispatcher Admin CSS
+ */
+
+.wwr-admin-wrap {
+  font-family: inherit;
+}
+
+.wwr-replay-btn {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+  border-color: #cbd5e1 !important;
+  transition: all 0.2s ease !important;
+}
+
+.wwr-replay-btn:hover {
+  background: #e2e8f0 !important;
+}
+

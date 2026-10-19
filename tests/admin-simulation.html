@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WordPress Admin &rsaquo; Webhook Dead-Letter Queue</title>
+  <link rel="stylesheet" href="../assets/css/dlq-console.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      background: #f0f0f1;
+      color: #3c434a;
+      display: flex;
+    }
+    #adminmenuwrap {
+      width: 160px;
+      background: #1d2327;
+      min-height: 100vh;
+      color: #f0f0f1;
+    }
+    .wp-menu-item {
+      padding: 10px 15px;
+      font-size: 13px;
+      color: #c3c4c7;
+      border-bottom: 1px solid #2c3338;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .wp-menu-item.active {
+      background: #7f54b3;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    #wpcontent {
+      flex: 1;
+      padding: 24px 32px;
+    }
+    .wp-heading-inline {
+      font-size: 23px;
+      font-weight: 400;
+      margin: 0 0 8px 0;
+      color: #1d2327;
+    }
+    .description {
+      color: #646970;
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 24px;
+    }
+    .postbox {
+      background: #ffffff;
+      border: 1px solid #c3c4c7;
+      border-radius: 4px;
+      padding: 24px;
+      box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    }
+    table.widefat {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      border: 1px solid #c3c4c7;
+    }
+    table.widefat th {
+      background: #f6f7f7;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid #c3c4c7;
+      font-weight: 600;
+    }
+    table.widefat td {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f1;
+    }
+    .button-small {
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+    }
+    .button-small:hover {
+      background: #e2e8f0;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    window.wwrData = {
+      ajaxUrl: '/wp-admin/admin-ajax.php',
+      nonce: 'wwr_test_nonce',
+      i18n: {
+        replaying: 'Replaying...',
+        success: 'Webhook delivery replayed successfully!'
+      }
+    };
+  </script>
+  <script src="../assets/js/dlq-console.js"></script>
+</head>
+<body>
+  <div id="adminmenuwrap">
+    <div style="padding: 16px; font-weight: bold; color: #fff; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+      <span style="background: #2271b1; padding: 2px 6px; border-radius: 3px;">WP</span> Dashboard
+    </div>
+    <div class="wp-menu-item">📦 WooCommerce</div>
+    <div class="wp-menu-item">🛍️ Orders (HPOS)</div>
+    <div class="wp-menu-item active">📡 Webhook DLQ</div>
+    <div class="wp-menu-item">⚙️ Settings</div>
+    <div class="wp-menu-item">📊 Status &amp; Logs</div>
+  </div>
+
+  <div id="wpcontent">
+    <h1 class="wp-heading-inline">WooCommerce Resilient Webhook Dead-Letter Dispatcher</h1>
+    <div class="description">
+      Guaranteed webhook delivery engine with exponential backoff (1m, 5m, 15m, 1h, 6h). Inspect failed third-party payloads and trigger 1-click manual replays.
+    </div>
+
+    <div class="grid-container">
+      <div class="postbox">
+        <h2 style="margin-top: 0; font-size: 16px;">Dead-Letter Queue (DLQ) &amp; Active Retries</h2>
+
+        <table class="widefat">
+          <thead>
+            <tr>
+              <th>Event / Topic</th>
+              <th>Target Endpoint</th>
+              <th>Attempt</th>
+              <th>Status</th>
+              <th>Last Error</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>order.created</strong><br>
+                <span style="font-size: 11px; color: #64748b;">dlq_6714032a881</span>
+              </td>
+              <td><code style="font-size: 11px;">https://api.hubspot.com/webhooks/v3/orders</code></td>
+              <td>3 / 5</td>
+              <td>
+                <span style="padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; background: #fef3c7; color: #92400e;">
+                  RETRYING
+                </span>
+              </td>
+              <td><span style="color: #dc2626; font-size: 12px;">HTTP 504 Gateway Timeout</span></td>
+              <td>
+                <button type="button" class="button-small wwr-replay-btn" data-event-id="dlq_6714032a881">
+                  ↻ Replay
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>order.updated</strong><br>
+                <span style="font-size: 11px; color: #64748b;">dlq_6714022c419</span>
+              </td>
+              <td><code style="font-size: 11px;">https://a.klaviyo.com/api/track/placed-order</code></td>
+              <td>2 / 5</td>
+              <td>
+                <span style="padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; background: #dcfce7; color: #166534;">
+                  SUCCEEDED
+                </span>
+              </td>
+              <td><span style="color: #166534; font-size: 12px;">Delivered on retry #2</span></td>
+              <td>
+                <span style="color: #64748b; font-size: 12px;">Resolved</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>order.fulfilled</strong><br>
+                <span style="font-size: 11px; color: #64748b;">dlq_671399df812</span>
+              </td>
+              <td><code style="font-size: 11px;">https://api.shipstation.com/v2/orders/push</code></td>
+              <td>5 / 5</td>
+              <td>
+                <span style="padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; background: #fee2e2; color: #991b1b;">
+                  DEAD_LETTER
+                </span>
+              </td>
+              <td><span style="color: #dc2626; font-size: 12px;">HTTP 502 Bad Gateway</span></td>
+              <td>
+                <button type="button" class="button-small wwr-replay-btn" data-event-id="dlq_671399df812">
+                  ↻ Replay
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="postbox">
+        <h2 style="margin-top: 0; font-size: 16px;">Resilience Policy</h2>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 16px;">
+          <strong style="display: block; font-size: 13px; color: #0f172a; margin-bottom: 6px;">Exponential Backoff Ladder:</strong>
+          <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #475569; line-height: 1.6;">
+            <li><strong>Attempt 1:</strong> Immediate (Default WC)</li>
+            <li><strong>Attempt 2:</strong> +1 minute</li>
+            <li><strong>Attempt 3:</strong> +5 minutes</li>
+            <li><strong>Attempt 4:</strong> +15 minutes</li>
+            <li><strong>Attempt 5:</strong> +1 hour</li>
+            <li><strong>Final:</strong> Retained in Dead-Letter Queue (DLQ)</li>
+          </ul>
+        </div>
+        <p style="font-size: 12px; color: #64748b; line-height: 1.5;">
+          Built on top of WooCommerce Action Scheduler for high-concurrency resilience without blocking PHP worker threads.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
