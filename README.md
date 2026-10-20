@@ -36,6 +36,26 @@ However, native webhook deliveries can run into real-world issues:
 
 ---
 
+
+---
+
+## 🏗️ Architecture & Dead-Letter Queue Pipeline
+
+How outgoing order webhooks are protected with Action Scheduler exponential retry and isolated dead-letter handling:
+
+```mermaid
+flowchart LR
+    A[Order Completed Event] --> B[Webhook Dispatcher]
+    B --> C{Delivery Success?}
+    C -- 200 OK --> D[Mark Delivered & Archive]
+    C -- Timeout / 5xx Error --> E[Action Scheduler Queue]
+    E --> F[Exponential Backoff Retry 1, 2, 3...]
+    F --> G{Max Retries Exceeded?}
+    G -- No --> B
+    G -- Yes --> H[Dead Letter Queue DLQ]
+    H --> I[Admin Alert & Manual Replay UI]
+```
+
 ## 🛠️ Key Architectural Features
 
 - **Automated Retry Scheduling:** Automatically retries failed webhook deliveries at spaced intervals (e.g., +1m, +5m, +15m, +1h, +6h) before marking them for review.
